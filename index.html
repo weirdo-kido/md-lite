@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<!-- Modern Minimalist Markdown Copyright (c) 2026 weirdo-kido Licensed under MPL 2.0 -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content, viewport-fit=cover">
+  <title>md lite - Modern Minimalist Markdown</title>
+  <meta name="description" content="Modern Minimalist Markdown">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://weirdo-kido.github.io/md-lite/">
+  <link rel="icon" type="img/png" href="favicon.png">
+<style>
+  :root {
+    --bg: #1d1d1d;
+    --win: rgba(20, 20, 20, 0.9);
+    --brd: #262626;
+    --prm: #f5f6f7;
+    --sec: #a1a1aa;
+    --accent: #ff5f57;
+  }
+
+  * { box-sizing: border-box; }
+  
+  ::selection { background: var(--sec); color: var(--brd); }
+
+  body {
+    background: var(--bg);
+    color: var(--prm);
+    font-family: system-ui, -apple-system, sans-serif;
+    height: 100dvh;
+    margin: 0;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+
+  h1, h2, h3 { 
+  margin: 24px 0px 16px; 
+  padding: 0; 
+  line-height: 1.2;
+  }
+
+  #open-sys-btn {
+    position: fixed;
+    bottom: 40px;
+    z-index: 10;
+    padding: 8px 8px 8px 8px;
+    background: #171717;
+    border: 1px solid var(--brd);
+    border-radius: 50%;
+    user-select: none;
+    -webkit-user-select: none;
+    backdrop-filter: blur(10px);
+    transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  #open-sys-btn.window-active {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+  }
+
+  #mac-window {
+    display: none;
+    flex-direction: column;
+    width: 90%;
+    max-width: 500px;
+    height: 450px;
+    background: var(--win);
+    border: 1px solid var(--brd);
+    border-radius: 16px;
+    backdrop-filter: blur(25px);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+    animation: grow .3s ease-out;
+  }
+
+  @keyframes grow { 
+    from { opacity: 0; transform: scale(.95); } 
+    to { opacity: 1; transform: scale(1); } 
+  }
+
+  #window-header { 
+    height: 50px; 
+    display: flex; 
+    align-items: center; 
+    padding: 0 20px;
+  }
+  
+  #window-header::after {
+    content: 'note.md';
+    flex: 1;
+    font-size: 10px;
+    color: var(--sec);
+    text-align: center;
+    opacity: 0.5;
+    transition: .2s;
+  }
+
+  #window-header:hover::after { 
+    content: 'Double click to save'; 
+    opacity: 1; 
+  }
+
+  .close-box { 
+    width: 12px; 
+    height: 12px; 
+    background: var(--accent); 
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  #window-content { flex: 1; position: relative; }
+
+  #markdown-input, 
+  #markdown-preview {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    padding: 0 25px 60px;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--prm);
+    background: transparent;
+    border: none;
+    outline: none;
+    overflow-y: auto;
+    scrollbar-width:none;
+    word-wrap: break-word;
+  }
+
+  #markdown-input { resize: none; color: var(--sec); }
+
+  #markdown-preview h1 { font-size: 1.5rem; border-bottom: 1px solid var(--brd); font-weight: 604; }
+  #markdown-preview h2, 
+  #markdown-preview h3 { font-weight: 600; }
+  #markdown-preview > *:first-child { margin-top: 0 !important; }
+  #markdown-preview p { margin: 0 0 12px; }
+  #markdown-preview a { color: var(--prm); text-decoration: underline; }
+  
+  #markdown-preview code { 
+    font-family: monospace;
+    background: rgba(255,255,255,0.05); 
+    padding: 2px 6px; 
+    border-radius: 4px; 
+  }
+
+  #markdown-preview blockquote { 
+    margin: 16px 0;
+    padding-left: 12px; 
+    border-left: 3px solid var(--brd); 
+    color: var(--sec); 
+    font-style: italic; 
+  }
+
+  #toggle-btn {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    z-index: 5;
+    padding: 6px 12px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--sec);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--brd);
+    border-radius: 8px;
+    backdrop-filter: blur(5px);
+    user-select: none;
+    transition: .2s;
+  }
+
+  .hidden { display: none !important; }
+</style>
+
+</head>
+<body>
+<main>
+<button id="open-sys-btn" aria-label="open editor">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="#f5f5f7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+    </svg>
+</button>
+</main>
+<div id="mac-window">
+    <div id="window-header">
+        <div class="close-box" id="close-btn"></div>
+    </div>
+    <div id="window-content">
+        <textarea id="markdown-input" placeholder="Write something..." spellcheck="false"></textarea>
+        <div id="markdown-preview" class="hidden"></div>
+        <button id="toggle-btn">Preview</button>
+    </div>
+</div>
+<script>
+/* 
+ * 2026 Modern Minimalist Markdown
+ * Shortcut: Ctrl + . to Toggle
+ */
+!(() => {
+    const $ = id => document.getElementById(id);
+    const elements = {
+        win: $('mac-window'),
+        openBtn: $('open-sys-btn'),
+        closeBtn: $('close-btn'),
+        input: $('markdown-input'),
+        preview: $('markdown-preview'),
+        toggleBtn: $('toggle-btn'),
+        header: $('window-header')
+    };
+
+    let isPreview = false;
+
+    const parseMarkdown = (text) => {
+        if (!text.trim()) return `<i style="color:var(--sec)">Nothing to preview...</i>`;
+
+        const safeText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        return safeText
+    .replace(/`([\s\S]*?)`/g, '<pre><code>$1</code></pre>')
+    .replace(/^\/\s+(.*$)/gm, '<blockquote>$1</blockquote>')
+    .replace(/^(#{1,3})\s+(.*$)/gm, (match, hashes, content) => {
+        const level = hashes.length;
+        return `<h${level}>${content.trim()}</h${level}>`;
+    })
+    .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+    .replace(/\*(.*?)\*/g, '<i>$1</i>')
+    .replace(/~(.*?)~/g, '<s>$1</s>')
+    .replace(/^\s*-\s+(.*$)/gm, '<div class="list-item">• $1</div>')
+    .replace(/\[(.*?)\]\((https?:\/\/.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+    .replace(/  /g, '<br>');
+    };
+
+    const toggleView = () => {
+        isPreview = !isPreview;
+
+        elements.preview.innerHTML = isPreview ? parseMarkdown(elements.input.value) : '';
+        elements.input.classList.toggle('hidden', isPreview);
+        elements.preview.classList.toggle('hidden', !isPreview);
+        elements.toggleBtn.textContent = isPreview ? "EDIT" : "PREVIEW";
+        
+        if (!isPreview) elements.input.focus();
+    };
+
+
+window.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === '.') {
+        e.preventDefault();
+
+        if (elements.win.style.display === 'none' || !elements.win.style.display) {
+            elements.openBtn.click();
+        } else {
+            toggleView();
+        }
+    }
+
+    if (e.key === 'Escape' && elements.win?.style.display === 'flex') {
+        elements.closeBtn.click();
+        elements.openBtn.focus();
+    }
+});
+
+
+    elements.toggleBtn.onclick = toggleView;
+
+    elements.openBtn.onclick = () => {
+        elements.win.style.display = 'flex';
+        elements.openBtn.classList.add('window-active');
+        try {
+            elements.input.value = localStorage.getItem('md_cache') || '';
+        } catch (e) { console.warn("Storage access denied"); }
+        elements.input.focus();
+    };
+
+    elements.closeBtn.onclick = () => {
+        elements.win.style.display = 'none';
+        elements.openBtn.classList.remove('window-active');
+    };
+
+  let saveTimeout;
+    elements.input.oninput = (e) => {
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+        try {
+            localStorage.setItem('md_cache', e.target.value);
+        } catch (err) {console.error("Disk Full");}
+    }, 300);
+    };
+
+    elements.header.ondblclick = () => {
+        const blob = new Blob([elements.input.value], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        Object.assign(a, { href: url, download: 'note.md' }).click();
+        URL.revokeObjectURL(url);
+    };
+})();
+</script>
+</body>
+</html>
